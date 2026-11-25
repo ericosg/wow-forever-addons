@@ -40,6 +40,7 @@ tools\check.ps1 Foo -Fix   # format with StyLua first
 | stylua --check | formatting drift |
 | Test-AddonToc | missing or wrongly-cased files, missing `Interface: 16001`, unprefixed SavedVariables, BOM, Lua files no TOC lists |
 | Test-UiXml | XML that violates Blizzard's `UI.xsd` |
+| coexistence | a SavedVariable or slash command declared by two of our addons (always checks all addons) |
 | smoke.lua | runs the addon under real Lua 5.1 against a fake client: file load, `ADDON_LOADED`, `PLAYER_LOGIN`, `PLAYER_ENTERING_WORLD`, combat enter/leave, every slash command with `""` and `"help"`, `PLAYER_LOGOUT`; fails on any error or leaked global |
 
 The gate **cannot** tell you: what an API really returns, whether a frame looks right, whether something taints, whether a value is secret in combat, or anything timing-related. Say so in the hand-off.
@@ -111,3 +112,27 @@ tools\check.ps1                # new W113/W143 warnings mean an API we use was r
 ```
 
 Then update the build number in `CLAUDE.md` and the header of `kb/README.md`, and read the new section of `https://warcraft.wiki.gg/wiki/Patch_1.60.1/API_changes` (or its successor).
+
+## 8. Publishing
+
+The workspace is one public repository, `https://github.com/ericosg/wow-forever-addons` (MIT). Commit and push only when the user asks.
+
+```powershell
+tools\check.ps1                                   # must pass
+git grep -n -I -E "<account folder>|<character name>"   # must find nothing; real values are in CLAUDE.local.md
+git add -A; git status --short                    # reference/, tools/bin/ and CLAUDE.local.md must not appear
+git commit                                        # what changed; what was verified in game vs offline
+git push
+```
+
+The GitHub CLI (`gh`) is installed for anything beyond push: releases, issues, repository settings. Its path is in `CLAUDE.local.md`.
+
+To let other people install an addon, they copy its folder from `addons/` into `_forever_\Interface\AddOns\`. Packaged releases for CurseForge or Wago are not set up; research/tooling-and-debugging.md section 5 describes the BigWigs packager (flavor `forever`, TOC suffix `_Camelot`).
+
+## 9. Lessons from the first addon (AuctionStatFilter, 2026-11-25)
+
+- The first version passed every offline check and was still wrong in game, because a fake API in a test returns what you imagine the client returns. The bug was judging items before their data was cached. Offline tests prove logic, not assumptions about the client.
+- Three in-game rounds were needed. Each round costs the user a `/reload` or a restart, so make every round answer a question: ship a diagnostic log with the first version of anything that reads client data.
+- A capped log should keep the informative entries. The first log filled with 80 cheap statless items and missed the ones in question.
+- Replacing a Blizzard frame's data table (the browse list) and letting Blizzard's code render it worked, including a purchase, with no taint problems. Prefer narrowing Blizzard's UI over rebuilding it.
+- The user's suggestion (apply the filter on Search, not while typing) made the addon simpler and matched how Blizzard's own filters behave.

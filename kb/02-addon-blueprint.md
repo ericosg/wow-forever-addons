@@ -65,6 +65,51 @@ A single-client addon needs no `_Forever` suffix and no `AllowLoadGameType`. Fil
 
 Verify each in `reference/` before first use; Blizzard's own callers are the best examples (`Grep` for the function name under `reference/wow-ui-source/Interface/AddOns`).
 
+## Coexistence
+
+Every addon here must work installed alone and installed together with any combination of the others. Related addons will share a Blizzard window (several auction house addons are planned), which is where conflicts come from. Treat "what else of ours touches this?" as a design question for every feature.
+
+**Independence**
+
+- No addon requires another addon from this repo. If one can use another, declare `## OptionalDeps: Other` and test `C_AddOns.IsAddOnLoaded("Other")` at run time; the feature must degrade cleanly when it is absent.
+- Never rely on load order between our addons. Alphabetical order changes when an addon is renamed or added.
+- No file is shared between addon folders. Each folder is installable by copying it alone.
+
+**Names**
+
+Anything that lives in a shared namespace carries the addon's name: SavedVariables (`FooDB`), slash commands (`/foo`; check the others in `.luacheckrc` for clashes on short forms), named frames (`FooPanel`), `StaticPopupDialogs["FOO_CONFIRM"]`, Settings variable IDs (`"Foo_Enabled"`), addon-message prefixes, `EventRegistry` event names (`"Foo.Changed"`), keybinding names (`BINDING_NAME_FOO_TOGGLE`). `tools\check.ps1` fails when two addons declare the same SavedVariable or slash command.
+
+**Shared Blizzard surfaces**
+
+- Find existing users first: `Grep` the Blizzard frame or function name under `addons/`.
+- Hooks must stack: `hooksecurefunc` and `HookScript` only. Never `SetScript` on a Blizzard frame, replace a Blizzard method, or call `UnregisterAllEvents` on something you did not create.
+- A hook must tolerate other hooks having run before or after it. Do not keep a private copy of Blizzard state and write it back later (that erases whatever another addon did in between) unless the addon is the registered owner of that state under the shared mechanism below.
+- Do not change shared settings as a side effect: CVars, Blizzard's saved filters and sort order, tooltip anchors, frame strata of Blizzard frames.
+
+**Composing behaviour**
+
+When two addons need to act on the same thing, neither may own it outright. They combine through one small shared component that:
+
+- is embedded in every addon that needs it (the `LibStub` pattern: each copy registers a version, the newest wins, so any subset of addons carries a working copy);
+- lets each addon register its contribution (a filter predicate, a column, a docked panel) and unregister it;
+- applies all contributions in one place, in a defined order, with one refresh.
+
+For the auction browse list this means: one shared "browse filter" library holds the unfiltered results and the hooks, and each addon registers a predicate; a row is shown when every registered predicate accepts it. Build this when the second such addon is written, and move the first addon onto it in the same change. Until then the single existing addon may own the surface, and the debt is listed in the `CLAUDE.md` backlog.
+
+**UI**
+
+- Panels attached to the same Blizzard window dock through a shared layout (same library): each registers its frame, and they stack in a stable order with no overlap, whichever subset is installed. A lone addon looks complete on its own.
+- One visual family: the same templates, fonts, padding, button sizes and wording ("Clear All", "Press Search to apply") across related addons. Copy from the existing addon rather than inventing.
+- One interaction model per window: if one auction addon applies on Search, they all do.
+- Never cover Blizzard controls or another addon's panel; never steal keyboard focus on show.
+- Chat output is prefixed with the addon's own name, so the user can tell which addon spoke.
+
+**Checks before hand-off**
+
+- `tools\check.ps1` with no arguments: every addon, plus the cross-addon name check.
+- Scenario tests for a shared component cover: addon A alone, addon B alone, both in either load order.
+- Ask the user to test with all of our addons enabled, and once with only the new one.
+
 ## Libraries
 
 Default to none. The client now ships most of what Ace3-era libraries provided (settings, menus, serialisation, callbacks, timers). Bring in a library only when it replaces a lot of risky code: LibDataBroker/LibDBIcon for a broker display, AceDB for real profile support, LibEditMode for Edit Mode integration, ChatThrottleLib for heavy addon comms. Embed under `Libs/` (excluded from lint and formatting), list `LibStub` first, and confirm the library's TOC or source mentions 16001 or is version-agnostic.

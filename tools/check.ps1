@@ -38,6 +38,32 @@ try {
   if (Get-ChildItem $target -Recurse -Filter *.xml -File | Where-Object { $_.FullName -notmatch '[\\/]Libs?[\\/]' }) {
     Invoke-Step "XML (Blizzard UI.xsd)" { & "$PSScriptRoot\Test-UiXml.ps1" -Xsd $xsd -Path $target }
   }
+  Invoke-Step "coexistence (no SavedVariable or slash command declared by two addons)" {
+    $claims = @{}
+    $clashes = 0
+    foreach ($a in Get-ChildItem (Join-Path $root "addons") -Directory) {
+      $names = @()
+      foreach ($toc in Get-ChildItem $a.FullName -Filter *.toc -File) {
+        foreach ($line in Get-Content $toc.FullName) {
+          if ($line -match '^##\s*SavedVariables(PerCharacter)?\s*:\s*(.+)$') { $names += ($Matches[2] -split '\s*,\s*' | Where-Object { $_ }) }
+        }
+      }
+      foreach ($lua in Get-ChildItem $a.FullName -Recurse -Filter *.lua -File | Where-Object { $_.FullName -notmatch '[\\/](Libs?|tests?)[\\/]' }) {
+        foreach ($m in [regex]::Matches((Get-Content $lua.FullName -Raw), '(?m)^\s*(SLASH_\w+?)\d+\s*=\s*"(/[^"]+)"')) {
+          $names += $m.Groups[1].Value
+          $names += $m.Groups[2].Value.ToLower()
+        }
+      }
+      foreach ($name in ($names | Sort-Object -Unique)) {
+        if ($claims.ContainsKey($name) -and $claims[$name] -ne $a.Name) {
+          Write-Host "CLASH $name is declared by both $($claims[$name]) and $($a.Name)" -ForegroundColor Red
+          $clashes++
+        } else { $claims[$name] = $a.Name }
+      }
+    }
+    Write-Host "$($claims.Count) names checked across addons"
+    $global:LASTEXITCODE = [int]($clashes -gt 0)
+  }
   foreach ($dir in $addonDirs) {
     Invoke-Step "smoke test: $($dir.Name) (load, login, combat, slash commands, logout)" {
       & "$bin\lua5.1.exe" "$PSScriptRoot\smoke.lua" $dir.FullName
