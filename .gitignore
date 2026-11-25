@@ -1,0 +1,10 @@
+# Read-only checkouts and caches; recreate with tools\update-reference.ps1
+reference/
+# Portable tool binaries; see kb\05-workflow.md for download URLs
+tools/bin/
+# Packager output
+.release/
+*.zip
+
+# Machine-specific notes
+CLAUDE.local.md

@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Forever DevKit
+## Notes: Development aid. Saves Lua errors, blocked actions and API probe results to SavedVariables so they can be read from disk after /reload.
+## Author: Eric
+## Version: 0.1.0
+## Category: Development
+## SavedVariables: ForeverDevKitDB
+
+Probes.lua
+ForeverDevKit.lua

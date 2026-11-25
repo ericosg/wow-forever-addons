@@ -1,0 +1,12 @@
+## Interface: 16001
+## Title: Auction Stat Filter
+## Notes: Filter auction house browse results by minimum item stats.
+## Author: Eric
+## Version: 0.1.0
+## Category: Auction House
+## SavedVariables: AuctionStatFilterDB
+
+AuctionStatFilter.lua
+Stats.lua
+Filter.lua
+Panel.lua
