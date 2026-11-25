@@ -7,11 +7,12 @@ Addons for the **World of Warcraft: Forever** client (patch 1.60.1, `## Interfac
 | Addon | What it does | Status |
 |---|---|---|
 | [AuctionStatFilter](addons/AuctionStatFilter) | Filters the auction house browse list by minimum item stats ("at least 6 Agility"), on top of Blizzard's own search and filters. | Verified in game |
+| [AuctionSuffixPrice](addons/AuctionSuffixPrice) | On the Sell tab, prices and lists a random-suffix item ("Superior Tunic of Agility") against auctions of the same suffix only, instead of every variant of the base item. | Verified in game |
 | [ForeverDevKit](addons/ForeverDevKit) | Development aid: saves Lua errors, blocked actions, an event trace and answers to API "probes" into SavedVariables, so they can be read from disk after `/reload`. | Verified in game |
 
 ### Installing an addon
 
-Copy the addon's folder from `addons/` into `World of Warcraft\_forever_\Interface\AddOns\` and restart the game.
+Copy the addon's folder from `addons/` into `World of Warcraft\_forever_\Interface\AddOns\` and restart the game. Each addon works on its own and alongside the others.
 
 ## Knowledge base
 
