@@ -26,6 +26,7 @@ python tools\wowapi.py C_Spell.GetSpellInfo   # signature, returns, secret flags
 - `addons/<AddonName>/` - one folder per addon: `<AddonName>.toc`, Lua files, optional XML, `README.md`, optional `tests/smoke.lua` (offline scenario)
 - `addons/ForeverDevKit/` - dev aid: saves Lua errors, blocked actions, an event trace and API probe results to SavedVariables. Proven in game
 - `addons/AuctionStatFilter/` - first real addon, verified in game; the model for structure, a scenario test and a diagnostic log
+- `addons/AuctionSuffixPrice/` - Sell tab: prices and lists random-suffix items against the same suffix. Verified in game; its test carries a miniature of Blizzard's sell frame and price list
 - `kb/` - knowledge base: essentials, blueprint, workflow, open questions, and long research references
 - `reference/` - read-only checkouts of Blizzard's UI source and API dumps for this build (`forever` branches). Not ours, not versioned; never edit. Recreate with `tools\update-reference.ps1`
 - `tools/wowapi.py` - offline API lookup over `reference/`
@@ -85,4 +86,5 @@ Every addon in this repo must work **installed alone, and installed together wit
 
 ## Addon ideas / backlog
 - Coexistence debt: AuctionStatFilter currently owns `AuctionHouseFrame.BrowseResultsFrame.browseResults` and the dock position right of the auction house by itself. Before a second addon filters the browse list or docks a panel there, build the shared mechanism described in `kb\02-addon-blueprint.md` ("Coexistence") and move AuctionStatFilter onto it.
+- Coexistence note: AuctionSuffixPrice wraps the data provider of `AuctionHouseFrame.ItemSellList` and hooks `AuctionHouseFrame.ItemSellFrame` (Sell tab only; AuctionStatFilter does not touch either). A second addon that filters or annotates the sell list must share that through one mechanism, as for the browse list.
 - AuctionStatFilter: more stats ("Equip:" effects such as attack power and spell power, armor), a price cap, saved presets. Offered to the user 2026-11-25; none chosen yet.

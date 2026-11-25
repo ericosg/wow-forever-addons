@@ -136,3 +136,12 @@ To let other people install an addon, they copy its folder from `addons/` into `
 - A capped log should keep the informative entries. The first log filled with 80 cheap statless items and missed the ones in question.
 - Replacing a Blizzard frame's data table (the browse list) and letting Blizzard's code render it worked, including a purchase, with no taint problems. Prefer narrowing Blizzard's UI over rebuilding it.
 - The user's suggestion (apply the filter on Search, not while typing) made the addon simpler and matched how Blizzard's own filters behave.
+
+## 10. Lessons from the second addon (AuctionSuffixPrice, 2026-11-25)
+
+- It worked in game on the first round. What made the difference: reading Blizzard's sell frame end to end before designing, and a scenario test built on a miniature port of that frame (its `SetItem`, `GetBestEntry`, `UpdatePriceSelection` and the list's data provider), so the hooks were exercised against Blizzard's real call order, including both orders of event delivery.
+- An always-on diagnostic log answered every open question from one `/reload`: what the item keys and links look like, what the addon picked, which events fired.
+- When two designs are in doubt, build both behind a switch and let the game and the user choose. The log showed the rejected design's cost (a search per toggle, the price flickering to the default while waiting) more convincingly than an argument would have.
+- `hooksecurefunc` only gives post-hooks. A method the Blizzard function calls first on `self` (here `ClearSearchResultPrice` at the top of `UpdatePriceSelection`) can serve as the "before" marker, which is how the addon tells Blizzard's own row selection from the user's click.
+- The log is only useful if the code path ran: an empty log after a test means the test did not reach the addon (stackables use a different sell frame), not that all is well. Say what the log should contain before the user tests.
+- Ask for ForeverDevKit to stay enabled in every test round; without it there is no error or blocked-action record.

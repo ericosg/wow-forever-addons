@@ -1,0 +1,12 @@
+## Interface: 16001
+## Title: Auction Suffix Price
+## Notes: Sell tab: price and list random-suffix items against the same suffix only.
+## Author: Eric
+## Version: 0.2.0
+## Category: Auction House
+## SavedVariables: AuctionSuffixPriceDB
+
+AuctionSuffixPrice.lua
+Match.lua
+Sell.lua
+Panel.lua

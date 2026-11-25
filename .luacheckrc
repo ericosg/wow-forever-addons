@@ -9829,3 +9829,4 @@ files["addons/ForeverDevKit/**"] = { globals = { "ForeverDevKitDB", "SLASH_FOREV
 files["addons/ForeverDevKit/Probes.lua"] = { ignore = { "631" } } -- one probe per line, however long
 files["addons/AuctionStatFilter/**"] = { globals = { "AuctionStatFilterDB", "SLASH_AUCTIONSTATFILTER1" } }
 files["addons/*/tests/**"] = { max_line_length = false } -- offline scenarios run by tools/smoke.lua
+files["addons/AuctionSuffixPrice/**"] = { globals = { "AuctionSuffixPriceDB", "SLASH_AUCTIONSUFFIXPRICE1", "SLASH_AUCTIONSUFFIXPRICE2" } }
